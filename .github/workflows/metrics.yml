@@ -37,6 +37,14 @@ jobs:
           # 这样可以先把链路跑通，避免一开始堆太多插件导致排障成本升高。
           base: header, activity, community, repositories
 
+          # 这会额外拉取更多数据来提升总提交、PR、Issue 和参与仓库数的准确性，
+          # 对包含私有仓库和组织仓库的账号尤其有用，但也会增加 API 消耗和运行时长。
+          base_indepth: yes
+
+          # 默认只统计 owner 仓库，这里显式放开到协作仓库和组织成员仓库，
+          # 否则你在组织内或作为协作者参与的仓库不会进入基础统计。
+          repositories_affiliations: owner, collaborator, organization_member
+
           # 语言统计是 profile README 最常见的补充信息，这里先用默认算法，执行时间更可控。
           plugin_languages: yes
 
