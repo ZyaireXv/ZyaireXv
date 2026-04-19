@@ -52,6 +52,10 @@ jobs:
           # 第一版先忽略掉，避免卡片把注意力都放在样式层语言上。
           plugin_languages_ignored: html, css
 
+          # 这个仓库是 fork 过来的源码镜像，会把语言占比明显拉向 TypeScript；
+          # 这里只从语言统计里排除它，避免误伤其他基础统计口径。
+          plugin_languages_skipped: ZyaireXv/claude-code-source-code
+
           # 只展示前 6 个语言，控制卡片长度，避免把 README 首屏压得太重。
           plugin_languages_limit: 6
 
