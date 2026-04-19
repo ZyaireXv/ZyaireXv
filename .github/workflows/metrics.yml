@@ -1,0 +1,54 @@
+name: Metrics
+
+on:
+  # 每天自动更新一次，避免主页上的活跃度、仓库数和语言分布长期停在旧数据。
+  schedule:
+    - cron: "0 1 * * *"
+  # 第一次把 secret 配好后，需要立即手动跑一次，所以保留手动触发入口。
+  workflow_dispatch:
+  # 当 profile README 自己发生改动时，顺手把图片一起重新生成，避免引用和产物脱节。
+  push:
+    branches:
+      - main
+
+jobs:
+  github-metrics:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Generate profile metrics
+        uses: lowlighter/metrics@latest
+        with:
+          # 显式写死目标用户，避免后续误用其他账号的 token 时把数据抓错到别的用户上。
+          user: ZyaireXv
+
+          # 这里必须使用你自己配置到仓库 Secret 里的个人访问令牌。
+          # 官方文档明确说明，很多用户级统计数据不是默认的仓库级 GITHUB_TOKEN 能完整读取的。
+          token: ${{ secrets.METRICS_TOKEN }}
+
+          # 文件名固定下来，README 就可以稳定引用，不会因为后面调整插件而反复改路径。
+          filename: github-metrics.svg
+
+          # 明确写成你的本地时区，避免活动时间和提交日历按 UTC 展示后看起来有“日期错位”。
+          config_timezone: Asia/Shanghai
+
+          # 第一版先只开最常用、最稳的一组基础信息。
+          # 这样可以先把链路跑通，避免一开始堆太多插件导致排障成本升高。
+          base: header, activity, community, repositories
+
+          # 语言统计是 profile README 最常见的补充信息，这里先用默认算法，执行时间更可控。
+          plugin_languages: yes
+
+          # HTML/CSS 在很多前端仓库里会显得占比很高，但对“个人画像”的辨识度帮助没那么大，
+          # 第一版先忽略掉，避免卡片把注意力都放在样式层语言上。
+          plugin_languages_ignored: html, css
+
+          # 只展示前 6 个语言，控制卡片长度，避免把 README 首屏压得太重。
+          plugin_languages_limit: 6
+
+          # 显示百分比就够了，先不打开更重的细节分析，减少工作流时间和失败面。
+          plugin_languages_details: percentage
+
+          # 把语言区块放到头部/活跃度之后、仓库统计之前，阅读顺序更自然一些。
+          config_order: base.header, base.activity+community, languages, base.repositories
